@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: route53-dynamic-ip
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: route53-dynamic-ip
+            image: andrewbackes/route53-dynamic-ip:v1
+            imagePullPolicy: IfNotPresent  
+            env:
+            - name: RECORD_HOSTNAME
+              value: "minecraft.aback.es"
+            - name: ZONE_ID
+              value: "Z3K0FFZGZARKY"
+            - name: AWS_PROFILE
+              value: "personal-route53"
+            volumeMounts:
+            - name: route53-creds
+              mountPath: "/root/.aws/"
+              readOnly: true
+          volumes:
+          - name: route53-creds
+            secret:
+              secretName: route53-creds
+              optional: false
